@@ -60,7 +60,7 @@
             <div class="row">
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                             <div class="progress">
-                                    <div id="indicator" class="progress-bar progress-bar-success progress-bar-striped active" style="width:0%">
+                                    <div id="indicator" class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width:0%">
                                         0%
                                     </div>
                 
@@ -163,7 +163,7 @@
 
             var progressDiv = document.querySelector('.progress');
             var indicatorDiv = document.querySelector('#indicator');
-            indicatorDiv.className = 'progress-bar progress-bar-success progress-bar-striped active';
+            indicatorDiv.className = 'progress-bar progress-bar-striped bg-success';
 
             var url = 'https://api.github.com/users/' + userName;
             var xhr = createCORSRequest('GET', url);
@@ -189,10 +189,10 @@
                     indicatorDiv.style.width = '75%';
                     indicatorDiv.innerHTML = '75%';
                 }
-
+                
                 if (this.readyState == 4 && this.status == 200) {
                     var user = JSON.parse(this.responseText);
-                    console.log(user);
+                    
                     document.getElementById('profileImage').src = user.avatar_url;
                     document.getElementById('profileImage').alt = user.name;
                     buildUserDetails(user);
@@ -215,10 +215,14 @@
 
                     indicatorDiv.style.width = '100%';
                     indicatorDiv.innerHTML = '100%';
+                    setTimeout(()=>progressDiv.style.visibility = 'hidden',1000);
+                    //progressDiv.style.visibility = 'hidden';
                 }
                 if (this.readyState == 4 && this.status == 404) {
                     var response = JSON.parse(this.responseText);
                     console.log(response.message);
+                    indicatorDiv.className = 'progress-bar progress-bar-striped bg-danger';
+                    setTimeout(()=>progressDiv.style.visibility = 'hidden',1000);
                     //document.getElementById('errMsg').innerHTML = 'User Not Found';
                     //document.getElementById('errMsg').style.color = 'red';
                 }
