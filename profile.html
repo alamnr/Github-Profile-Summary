@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title id="title">Github Profile Summary</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Barlow+Semi+Condensed">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/load-awesome@1.1.0/css/square-jelly-box.min.css">
+    <script src="js/app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            border: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #fff;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        footer {
+            text-align: center;
+
+        }
+
+        footer a:hover {
+            text-decoration: none;
+        }
+
+        #profileImage {
+            margin-top: 20px;
+        }
+
+        .highlight {
+            color: dodgerblue;
+        }
+
+        #mainContent-1,
+        #mainContent-2 {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <section id="header">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-2">
+                    <img id="profileImage" width=175px class="rounded">
+                </div>
+                <div id="userDetail" class="col-xs-12 col-sm-12 col-md-12 col-lg-3">
+
+                </div>
+                <div id="graph" class="col-xs-12 col-sm-12 col-md-12 col-lg-7">
+                    <canvas id="quarterCommitCount" style="display: block; width: 100%; height: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+    <hr>
+    <section id="mainContent-1">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-4">
+                    <h4 class="text-center">Repos per Language</h4>
+                    <canvas id="langRepoCount" style="display: block; width: 100%; height: 100%;"></canvas>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-4">
+                    <h4 class="text-center">Star per Language </h4>
+                    <canvas id="langStarCount" style="display: block; width: 100%; height: 100%;"></canvas>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-4">
+                    <h4 class="text-center">Commits per Language</h4>
+                    <canvas id="langCommitCount" style="display: block; width: 100%; height: 100%;"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+    <br> <hr>
+    <section id="mainContent-2">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+                    <h4 class="text-center">Repo Commit Count (top 10)</h4>
+                    <canvas id="repoCommitCount" style="display: block; width: 100%; height: 100%;"></canvas>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+                    <h4 class="text-center">Repo Star Count (top 10)</h4>
+                    <canvas id="repoStarCount" style="display: block; width: 100%; height: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+
+
+    </section>
+    
+    <footer>
+        <div class="fixed-bottom">
+            <hr>
+            GitHub profile summary is built with
+            <span class="highlight">Vanilla Jvascript </span> and
+            <a href="http://www.chartjs.org/docs/latest/" target="_blank">chart.js</a> (visualization). Source is on
+            <a href="https://github.com/alamnr" target="_blank"> GitHub.</a>
+        </div>
+    </footer>
+
+
+
+
+    <script>
+        var urlParams;
+        (window.onpopstate = function () {
+            var match,
+                pl = /\+/g,  // Regex for replacing addition symbol with a space
+                search = /([^&=]+)=?([^&]*)/g,
+                decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+                query = window.location.search.substring(1);
+
+            urlParams = {};
+            while (match = search.exec(query))
+                urlParams[decode(match[1])] = decode(match[2]);
+            document.getElementById('title').innerText = urlParams['user'] + '\'s Github Profile Summary';
+            getUserInfo(urlParams['user']);
+        })();
+
+        // alert(urlParams['user']);
+
+        function getUserInfo(userName) {
+
+            var url = 'https://api.github.com/users/' + userName;
+            var xhr = createCORSRequest('GET', url);
+            if (!xhr) {
+                alert('CORS not supported');
+                return;
+            }
+
+            xhr.onreadystatechange = function () {
+
+                if (this.readyState == 4 && this.status == 200) {
+                    var user = JSON.parse(this.responseText);
+                    console.log(user);
+                    document.getElementById('profileImage').src = user.avatar_url;
+                    document.getElementById('profileImage').alt = user.name;
+                    buildUserDetails(user);
+                    createLineChart();
+                    var data = {
+                        labels: ["Red", "Blue", "Yellow"],
+                        datasets: [{
+                            label: "My First Dataset",
+                            data: [300, 50, 100],
+                            backgroundColor: ["rgb(255, 99, 132)", "rgb(54, 162, 235)", "rgb(255, 205, 86)"]
+                        }]
+                    };
+                    var options = {};
+                    createPieChart('langRepoCount', data, options);
+                    createPieChart('langStarCount', data, options);
+                    createPieChart('langCommitCount', data, options);
+
+                    createPieChart('repoCommitCount', data, options);
+                    createPieChart('repoStarCount', data, options);
+                }
+                if (this.readyState == 4 && this.status == 404) {
+                    var response = JSON.parse(this.responseText);
+                    console.log(response.message);
+                    //document.getElementById('errMsg').innerHTML = 'User Not Found';
+                    //document.getElementById('errMsg').style.color = 'red';
+                }
+            }
+
+            xhr.send();
+        }
+
+        function buildUserDetails(user) {
+            var then = new Date(user.created_at);
+
+            var today = new Date();
+            var year = Math.floor((today - then) / 31536000000);
+            var output = `<ul class="list-group list-group-flush">
+                            <li class="list-group-item"><i class="fa fa-fw fa-user"></i> ${user.login} <small>( ${user.name} )</small>  </li>
+                            <li class="list-group-item"><i class="fa fa-fw fa-database"></i> ${user.public_repos} public repos  </li>
+                            <li class="list-group-item"><i class="fa fa-fw fa-clock-o"></i>Joined GitHub ${year} Year Ago  </li>
+                            <li class="list-group-item"><i class="fa fa-fw fa-envelope"></i> ${user.email ? user.email : ''}  </li>
+                            <li class="list-group-item"><i class="fa fa-fw fa-external-link"></i> <a href="${user.html_url}" target="_blank">View Profile On GitHub</a>   </li>
+                            </ul>`;
+            document.getElementById('userDetail').innerHTML = output;
+        }
+
+        function createLineChart() {
+            var ctx = document.getElementById('quarterCommitCount').getContext('2d');
+            var chart = new Chart(ctx, {
+                // The type of chart we want to create
+                type: 'line',
+
+                // The data for our dataset
+                data: {
+                    labels: ["January", "February", "March", "April", "May", "June", "July"],
+                    datasets: [{
+                        label: "My First dataset",
+                        backgroundColor: 'rgb(255, 99, 132)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        data: [0, 10, 5, 2, 20, 30, 45],
+                    }]
+                },
+
+                // Configuration options go here
+                options: {}
+            });
+        }
+
+        function createPieChart(id, data, options) {
+            var ctx = document.getElementById(id);
+            // For a pie chart
+            var myPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: data,
+                options: options
+            });
+
+        }
+
+    </script>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+
+</body>
+
+</html>

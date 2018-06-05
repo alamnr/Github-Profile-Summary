@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Github Profile Summary - Visualize Your github Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+        <style>
+         *{
+             margin: 0;
+             border: 0;
+         }
+         body{
+             font-family: Arial, Helvetica, sans-serif;
+             background-color: #fff;
+             color: #333;
+         }
+         .container{
+             padding: 15% 25%;
+         }
+         footer{
+             text-align: center;
+             
+         }
+         .highlight{
+             color: dodgerblue;
+         }
+        </style>
+</head>
+
+<body>
+      <nav></nav>
+      <section>
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <div >
+                           
+                                    <div class="form-group text-center">
+                                      <label class="h3 mb-3 font-weight-normal">Enter GitHub User Name</label>
+                                      <input type="text" class="form-control" id="gitUserName" placeholder="Ex: alamnr">
+                                      
+                                    </div>
+                                    
+                            
+                        
+                        <div id="errMsg" class="mb-3 font-weight-normal text-center"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+      </section>
+      <footer><div class="fixed-bottom">GitHub profile summary is built with <span class="highlight">Vanilla Jvascript </span>  and <a href="http://www.chartjs.org/docs/latest/" target="_blank">chart.js</a> (visualization). Source is on <a target="_blank" href="https://github.com/alamnr"> GitHub.</a></div></footer>
+    
+    
+
+      <script>
+          document.getElementById('gitUserName').addEventListener('keyup',function(e){
+           
+              if(e.keyCode == 13){
+                alert('Me');
+                if(e.target.value){
+                    checkUserPresence(e.target.value);
+                }
+                else{
+                    document.getElementById('errMsg').innerHTML = 'User Name Can\'t be Blank';
+                      document.getElementById('errMsg').style.color = 'red';
+                }
+                
+              }
+               
+            //e.preventDefault(); 
+           // console.log(e.keyCode );
+            
+          });
+
+          
+
+          function checkUserPresence(userName){
+              
+              var url = 'https://api.github.com/users/'+userName;
+              var xhr = createCORSRequest('GET', url);  
+              if (!xhr) {
+                alert('CORS not supported');
+                return;
+              }
+              
+              xhr.onreadystatechange = function(){
+                    
+                  if(this.readyState==4 && this.status ==200)
+                  {
+                      var user = JSON.parse(this.responseText);
+                      console.log(user);
+                      document.getElementById('errMsg').innerHTML = '<a class="btn btn-primary" href="profile.html?user='+userName+'">View Profile</a>';
+                  }
+                  if(this.readyState==4 && this.status==404){
+                      var response = JSON.parse(this.responseText);
+                      console.log(response.message);
+                      document.getElementById('errMsg').innerHTML = 'User Not Found';
+                      document.getElementById('errMsg').style.color = 'red';
+                  }
+              }
+              
+              xhr.send();
+          }
+      </script>
+
+      <script src="js/app.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
