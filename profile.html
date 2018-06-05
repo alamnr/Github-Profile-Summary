@@ -65,6 +65,7 @@
                                     </div>
                 
                                 </div>
+                                <p id="errMsg" class="text-center"></p>
 
                     </div>
                 
@@ -223,8 +224,8 @@
                     console.log(response.message);
                     indicatorDiv.className = 'progress-bar progress-bar-striped bg-danger';
                     setTimeout(()=>progressDiv.style.visibility = 'hidden',1000);
-                    //document.getElementById('errMsg').innerHTML = 'User Not Found';
-                    //document.getElementById('errMsg').style.color = 'red';
+                    document.getElementById('errMsg').innerHTML = 'User Not Found';
+                    document.getElementById('errMsg').style.color = 'red';
                 }
             }
 
