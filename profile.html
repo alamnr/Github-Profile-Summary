@@ -46,11 +46,35 @@
         #mainContent-2 {
             margin-bottom: 20px;
         }
+
+        .progress {
+            visibility: hidden;
+        }
     </style>
 </head>
 
 <body>
+
+    <section>
+        <div class="container">
+            <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                            <div class="progress">
+                                    <div id="indicator" class="progress-bar progress-bar-success progress-bar-striped active" style="width:0%">
+                                        0%
+                                    </div>
+                
+                                </div>
+
+                    </div>
+                
+            </div>
+    </section>
+
+    <hr>
+
     <section id="header">
+
         <div class="container">
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-2">
@@ -86,7 +110,8 @@
         </div>
 
     </section>
-    <br> <hr>
+    <br>
+    <hr>
     <section id="mainContent-2">
         <div class="container">
             <div class="row">
@@ -103,11 +128,10 @@
 
 
     </section>
-    
+
     <footer>
         <div class="fixed-bottom">
-            <hr>
-            GitHub profile summary is built with
+            <hr> GitHub profile summary is built with
             <span class="highlight">Vanilla Jvascript </span> and
             <a href="http://www.chartjs.org/docs/latest/" target="_blank">chart.js</a> (visualization). Source is on
             <a href="https://github.com/alamnr" target="_blank"> GitHub.</a>
@@ -137,6 +161,10 @@
 
         function getUserInfo(userName) {
 
+            var progressDiv = document.querySelector('.progress');
+            var indicatorDiv = document.querySelector('#indicator');
+            indicatorDiv.className = 'progress-bar progress-bar-success progress-bar-striped active';
+
             var url = 'https://api.github.com/users/' + userName;
             var xhr = createCORSRequest('GET', url);
             if (!xhr) {
@@ -144,7 +172,23 @@
                 return;
             }
 
+            progressDiv.style.visibility = 'visible';
+            indicatorDiv.style.width = '0%';
+            indicatorDiv.innerHTML = '0%';
             xhr.onreadystatechange = function () {
+
+                if (this.readyState == 1) {
+                    indicatorDiv.style.width = '25%';
+                    indicatorDiv.innerHTML = '25%';
+                }
+                if (this.readyState == 2) {
+                    indicatorDiv.style.width = '50%';
+                    indicatorDiv.innerHTML = '50%';
+                }
+                if (this.readyState == 3) {
+                    indicatorDiv.style.width = '75%';
+                    indicatorDiv.innerHTML = '75%';
+                }
 
                 if (this.readyState == 4 && this.status == 200) {
                     var user = JSON.parse(this.responseText);
@@ -168,6 +212,9 @@
 
                     createPieChart('repoCommitCount', data, options);
                     createPieChart('repoStarCount', data, options);
+
+                    indicatorDiv.style.width = '100%';
+                    indicatorDiv.innerHTML = '100%';
                 }
                 if (this.readyState == 4 && this.status == 404) {
                     var response = JSON.parse(this.responseText);
@@ -221,7 +268,7 @@
             var ctx = document.getElementById(id);
             // For a pie chart
             var myPieChart = new Chart(ctx, {
-                type: 'pie',
+                type: 'doughnut',
                 data: data,
                 options: options
             });
