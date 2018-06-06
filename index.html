@@ -15,7 +15,7 @@
          }
          body{
              font-family: Arial, Helvetica, sans-serif;
-             background-color: #fff;
+             background-color: #eee9df;
              color: #333;
          }
          .container{
@@ -54,7 +54,7 @@
         </div>
 
       </section>
-      <footer><div class="fixed-bottom">GitHub profile summary is built with <span class="highlight">Vanilla Jvascript </span>  and <a href="http://www.chartjs.org/docs/latest/" target="_blank">chart.js</a> (visualization). Source is on <a target="_blank" href="https://github.com/alamnr"> GitHub.</a></div></footer>
+      <footer><div class="fixed-bottom"><div>GitHub profile summary is built with <span class="highlight">Vanilla Jvascript </span>  and <a href="http://www.chartjs.org/docs/latest/" target="_blank">chart.js</a> (visualization). Sources on <a target="_blank" href="https://github.com/alamnr"> GitHub.</a></div><div> Inspired by <a href="https://profile-summary-for-github.com" target="_blank">profile-summary-for-github</a></div></div></footer>
     
     
 
@@ -62,7 +62,7 @@
           document.getElementById('gitUserName').addEventListener('keyup',function(e){
            
               if(e.keyCode == 13){
-                alert('Me');
+                //console.log('Me');
                 if(e.target.value){
                     checkUserPresence(e.target.value);
                 }
@@ -85,7 +85,7 @@
               var url = 'https://api.github.com/users/'+userName;
               var xhr = createCORSRequest('GET', url);  
               if (!xhr) {
-                alert('CORS not supported');
+                console.log('CORS not supported');
                 return;
               }
               
