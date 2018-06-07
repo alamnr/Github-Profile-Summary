@@ -284,6 +284,8 @@ function makeAjaxCORSRequestForQuarterCommitLineChart(url,index, repoArray) {
             break;
           }
         } 
+
+        setShareButtonHref();
          
         document.querySelector('#indicator').style.width = '100%';
         document.querySelector('#indicator').innerHTML = '100%';
@@ -299,7 +301,16 @@ function makeAjaxCORSRequestForQuarterCommitLineChart(url,index, repoArray) {
 }
 
 
-
+function setShareButtonHref(){
+  let profileUrl  = "https://alamnr.github.io/profile.html?user=" + user.login;
+  let shareText = user.login + "'s GitHub profile - Visualized:";
+  let twitterUrl = "https://twitter.com/intent/tweet?url=" + profileUrl + "&text=" + shareText + "&via=javascript&related=scope_closer";
+  let facebookUrl = "https://facebook.com/sharer.php?u=" + profileUrl + "&quote=" + shareText;
+  document.getElementById('twitter').href=twitterUrl;
+  document.getElementById('facebook').href=facebookUrl;
+  //console.log(twitterUrl);
+  //console.log(facebookUrl);
+}
 
 
 
