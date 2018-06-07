@@ -49,3 +49,13 @@ footer a:hover {
 }
 
 
+
+.fix-me{
+	position: fixed;
+	top: 200px;
+}
+
+.btn-block {
+    display: block;
+    width: 40%;
+}
