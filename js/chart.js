@@ -86,12 +86,12 @@ function createDoughnutChart(id,data) {
     }
     if (id === "repoCommitCount") {
         
-       // tooltipInfo = repoCommitCountDescriptions; // high quality programming
+        tooltipInfo = strMapToObj(repoCommitCountDescriptions); // high quality programming
         arrayRotate(colors, 4); // change starting color
     }
     if (id === "repoStarCount") {
         
-       // tooltipInfo = repoStarCountDescriptions; // high quality programming
+        tooltipInfo = strMapToObj(repoStarCountDescriptions); // high quality programming
         arrayRotate(colors, 2); // change starting color
     }
     new Chart(canvas.getContext("2d"), {
@@ -119,13 +119,7 @@ function createDoughnutChart(id,data) {
                 callbacks: {
                     afterLabel: function (tooltipItem, data) {
                         if (tooltipInfo !== null) {
-                            if (id === "repoCommitCount") {
-                                return wordWrap(tooltipInfo[repoCommitCountDescriptions["labels"][tooltipItem["index"]]], 45);
-                            }
-                            if (id === "repoStarCount") {
-                                return wordWrap(tooltipInfo[repoStarCountDescriptions["labels"][tooltipItem["index"]]], 45);
-                            }
-                            
+                            return wordWrap(tooltipInfo[data["labels"][tooltipItem["index"]]], 45);
                         }
                     }
                 },
@@ -153,6 +147,16 @@ function createDoughnutChart(id,data) {
             }
         }
     });
+}
+
+function strMapToObj(strMap) {
+    let obj = Object.create(null);
+    for (let [k,v] of strMap) {
+        // We don’t escape the key '__proto__'
+        // which can cause problems on older engines
+        obj[k] = v;
+    }
+    return obj;
 }
 
 function createColorArray(length) {
@@ -187,7 +191,7 @@ function wordWrap(str, n) {
     }
     let currentLine = [];
     let resultLines = [];
-    console.log('word wrap-'+str);
+    //console.log('word wrap-'+str);
     str.split(" ").forEach(word => {
         currentLine.push(word);
         if (currentLine.join(" ").length > n) {

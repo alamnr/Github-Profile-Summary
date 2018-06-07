@@ -58,7 +58,7 @@
         document.getElementById('gitUserName').addEventListener('keyup', function (e) {
 
             if (e.keyCode == 13) {
-                //console.log('Me');
+               
                 if (e.target.value) {
                     checkUserPresence(e.target.value);
                 }
@@ -69,8 +69,7 @@
 
             }
 
-            //e.preventDefault(); 
-            // console.log(e.keyCode );
+           
 
         });
 
@@ -89,12 +88,12 @@
 
                 if (this.readyState == 4 && this.status == 200) {
                     var user = JSON.parse(this.responseText);
-                    console.log(user);
+                    //console.log(user);
                     document.getElementById('errMsg').innerHTML = '<a class="btn btn-primary" href="profile.html?user=' + userName + '">View Profile</a>';
                 }
                 if (this.readyState == 4 && this.status == 404) {
                     var response = JSON.parse(this.responseText);
-                    console.log(response.message);
+                    //console.log(response.message);
                     document.getElementById('errMsg').innerHTML = 'User Not Found';
                     document.getElementById('errMsg').style.color = 'red';
                 }

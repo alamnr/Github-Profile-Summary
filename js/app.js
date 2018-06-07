@@ -87,8 +87,8 @@ function getUserInfo(userName) {
 
       var today = new Date();
       var lastQuarter = today.getFullYear() + '-Q' + (Math.ceil((today.getMonth() + 1) / 3));
-      // var year = Math.floor((today - then) / 31536000000);
-      console.log(lastQuarter);
+     
+      //console.log(lastQuarter);
       for (var i = then.getFullYear(); i <= today.getFullYear(); i++) {
         for (var j = 1; j <= 4; j++) {
           var quarter = i + '-Q' + j;
@@ -99,7 +99,7 @@ function getUserInfo(userName) {
       }
       
       calculateQuarterCommitCount(user.login);
-      console.log(quarterCommitCount);
+      //console.log(quarterCommitCount);
      
     }
 
@@ -138,12 +138,12 @@ function calculateQuarterCommitCount(userName) {
   xhr.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       var repos = JSON.parse(this.responseText);
-      console.log('All repos-' + repos.length);
+      //console.log('All repos-' + repos.length);
 
       const unforkRepo = repos.filter(repo => {
         return repo.fork === false && repo.size !== 0
       })
-      console.log('Own Repos -' + unforkRepo.length);
+     // console.log('Own Repos -' + unforkRepo.length);
       user.ownRepos= unforkRepo.length;
       user.forkedRepos= repos.length - unforkRepo.length;
       unforkRepo.forEach((myRepo,index, repoArray) => {
@@ -236,12 +236,12 @@ function makeAjaxCORSRequestForQuarterCommitLineChart(url,index, repoArray) {
                 map.delete(key);
               }
             })
-            console.log(top10SortedRepoCommitCount);
+           // console.log(top10SortedRepoCommitCount);
             top10SortedRepoCommitCount.forEach(function(value,key,map){
               top10SortedRepoCommitCountDescription.set(key,repoCommitCountDescriptions.get(key));
            })
            repoCommitCountDescriptions = top10SortedRepoCommitCountDescription;
-           console.log(repoCommitCountDescriptions);
+           //console.log(repoCommitCountDescriptions);
             createDoughnutChart('repoCommitCount',top10SortedRepoCommitCount);
             break;
           }
@@ -250,11 +250,12 @@ function makeAjaxCORSRequestForQuarterCommitLineChart(url,index, repoArray) {
         
         for (let value of repoStarCount.values()) {
           if(value){
-            let output =`<div id="repoStarCountDiv" class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+            let output =`<div id="repoStarCountDiv"  class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
             <h4 class="text-center">Stars per Repo (top 10)</h4>
-            <canvas id="repoStarCount" ></canvas>
+            <canvas id="repoStarCount"></canvas>
         </div>`;
-        document.getElementById('repoCommitCountDiv').className = 'col-xs-12 col-sm-12 col-md-12 col-lg-6';
+        document.getElementById('repoCommitCountDiv').className = 'col-xs-12 col-sm-12 col-md-6 col-lg-6';
+        
         
         
         let targetDiv=document.getElementById('repoCommitCountDiv')
@@ -273,27 +274,16 @@ function makeAjaxCORSRequestForQuarterCommitLineChart(url,index, repoArray) {
                 map.delete(key);
               }
             })
-            console.log(top10SortedRepoStarCount);
+           // console.log(top10SortedRepoStarCount);
              top10SortedRepoStarCount.forEach(function(value,key,map){
                 top10SortedRepoStarCountDescription.set(key,repoStarCountDescriptions.get(key));
              })
              repoStarCountDescriptions = top10SortedRepoStarCountDescription;
-             console.log(repoStarCountDescriptions);
+            // console.log(repoStarCountDescriptions);
             createDoughnutChart('repoStarCount',top10SortedRepoStarCount);
             break;
           }
         } 
-
-        /*console.log(langRepoCount);
-        console.log(langStarCount);
-        console.log(langCommitCount);*/
-
-        //console.log(repoCommitCount);
-       // console.log(repoStarCount);
-        //console.log(repoCommitCountDescriptions);
-       // console.log(repoStarCountDescriptions);
-
-
          
         document.querySelector('#indicator').style.width = '100%';
         document.querySelector('#indicator').innerHTML = '100%';
@@ -313,16 +303,3 @@ function makeAjaxCORSRequestForQuarterCommitLineChart(url,index, repoArray) {
 
 
 
-
-
-
-
-
-
-/*
-  new Chart(document.getElementById("chartjs-4"),{"type":"doughnut",
-  "data":{"labels":["Red","Blue","Yellow"],
-  "datasets":[{"label":"My First Dataset",
-  "data":[300,50,100],
-  "backgroundColor":["rgb(255, 99, 132)","rgb(54, 162, 235)","rgb(255, 205, 86)"]}]
-}});*/
