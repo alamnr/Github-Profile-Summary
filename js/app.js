@@ -16,7 +16,7 @@ function createCORSRequest(method, url) {
 }
 
 var quarterCommitCount = new Map();
-
+var user;
 
 
 
@@ -68,11 +68,12 @@ function getUserInfo(userName) {
       document.getElementById('errMsg').style.color = 'red';
     }
     if (this.readyState == 4 && this.status == 200) {
-      var user = JSON.parse(this.responseText);
+       user = JSON.parse(this.responseText);
 
       document.getElementById('profileImage').src = user.avatar_url;
       document.getElementById('profileImage').alt = user.name;
-      buildUserDetails(user);
+      document.getElementById('bio').innerHTML = user.bio;
+     
       var then = new Date(user.created_at);
 
       var today = new Date();
@@ -125,8 +126,8 @@ function buildUserDetails(user) {
   var today = new Date();
   var year = Math.floor((today - then) / 31536000000);
   var output = `<ul class="list-group list-group-flush">
-                    <li class="list-group-item"><i class="fa fa-fw fa-user"></i> ${user.login} <small>( ${user.name} )</small>  </li>
-                    <li class="list-group-item"><i class="fa fa-fw fa-database"></i> ${user.public_repos} public repos  </li>
+                    <li class="list-group-item"><i class="fa fa-fw fa-user"></i> ${user.login} <p><small>( ${user.name} )</small></p>  </li>
+                    <li class="list-group-item"><i class="fa fa-fw fa-database"></i> ${user.public_repos} public repos <p><small>(Own Repos- ${user.ownRepos?user.ownRepos:'0'}, Forked- ${user.forkedRepos})</small></p> </li>
                     <li class="list-group-item"><i class="fa fa-fw fa-clock-o"></i>Joined GitHub ${year} Year Ago  </li>
                     <li class="list-group-item"><i class="fa fa-fw fa-envelope"></i> ${user.email ? user.email : ''}  </li>
                     <li class="list-group-item"><i class="fa fa-fw fa-external-link"></i> <a href="${user.html_url}" target="_blank">View Profile On GitHub</a>   </li>
@@ -142,7 +143,7 @@ function calculateQuarterCommitCount(userName) {
   var xhr = createCORSRequest('GET', url);
 
   if (!xhr) {
-    alert('CORS not supported');
+    console.log('CORS not supported');
     return;
   }
 
@@ -155,7 +156,9 @@ function calculateQuarterCommitCount(userName) {
         return repo.fork === false
       })
       console.log('Own Repos -' + unforkRepo.length);
-      unforkRepo.forEach((myRepo, index, repoArray) => {
+      user.ownRepos= unforkRepo.length;
+      user.forkedRepos= repos.length - unforkRepo.length;
+      unforkRepo.forEach((myRepo,index, repoArray) => {
         //console.log(myRepo.commits_url.replace('{/sha}',''))
         makeAjaxCORSRequestForQuarterCommitLineChart(myRepo.commits_url.replace('{/sha}', ''),index, repoArray);
 
@@ -167,18 +170,20 @@ function calculateQuarterCommitCount(userName) {
   xhr.send();
 }
 
-
+var i=0;
 function makeAjaxCORSRequestForQuarterCommitLineChart(url,index, repoArray) {
   var xhr = createCORSRequest('GET', url);
-
+  
   if (!xhr) {
-    alert('CORS not supported');
+    console.log('CORS not supported');
     return;
   }
   xhr.onreadystatechange = function () {
+   
     if (this.readyState == 4 && this.status == 200) {
       var commits = JSON.parse(this.responseText);
-
+      i++;
+      
       // console.log(commits);
 
       commits.forEach(commit => {
@@ -187,7 +192,9 @@ function makeAjaxCORSRequestForQuarterCommitLineChart(url,index, repoArray) {
         var commitQuarter = commitDate.getFullYear() + '-Q' + (Math.ceil((commitDate.getMonth() + 1) / 3));
         quarterCommitCount.set(commitQuarter, quarterCommitCount.get(commitQuarter) + 1);
       })
-      if(index==repoArray.length-1){
+     // console.log('i-'+i+' length-'+repoArray.length);
+      if(i===repoArray.length){
+        buildUserDetails(user);
         createLineChart();
       }
       
