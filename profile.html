@@ -130,10 +130,20 @@
                 query = window.location.search.substring(1);
 
             urlParams = {};
-            while (match = search.exec(query))
+            while (match = search.exec(query)){
                 urlParams[decode(match[1])] = decode(match[2]);
+            }
+                
             document.getElementById('title').innerText = urlParams['user'] + '\'s Github Profile Summary';
-            getUserInfo(urlParams['user']);
+            
+            // Don't pollute the global scope, create data Object in function Scope
+            if(urlParams['user']){
+                
+                getUserInfo(urlParams['user'], data);
+            }
+            else{
+				window.location.replace(window.location.href.substring(0,window.location.href.lastIndexOf('/')+1)+'index.html');
+            }
             
         })();
 
