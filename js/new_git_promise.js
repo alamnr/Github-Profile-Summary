@@ -13,6 +13,7 @@ function createCORSRequest(method, url) {
     // CORS not supported.
     xhr = null;
   }
+  
   return xhr;
 }
 
@@ -61,7 +62,7 @@ function getJSON(url){
 
 function getUserRepos(url, repos){
 	//console.log('repo url-',url);
-	getJSON(url).then(response=>{
+	return getJSON(url).then(response=>{
 		//console.log(response);
 		if(!repos){
 			repos = [];
@@ -83,21 +84,12 @@ function getUserRepos(url, repos){
 		 
 		//console.log('Repo Array - ',repos);
     data.setRepos(repos);
-    console.log('Repos Array-',data.getRepos());
-		//return repos;
-    data.getRepos().forEach(repo=>{
-      let url = repo.commits_url.replace('{/sha}', '')+'?per_page=100&client_id=4451d14d8fff3a16d020&client_secret=d317892c35d7a7f4e383b92052cda6e8b7a3b3ea';
-        getCommitPerRepos(url,null,repo.name);
-    })
-    /*data.getRepos().reduce((chain,repo)=>{
-      return chain.then(()=>{
-        let url = repo.commits_url.replace('{/sha}', '')+'?per_page=100&client_id=4451d14d8fff3a16d020&client_secret=d317892c35d7a7f4e383b92052cda6e8b7a3b3ea';
-        getCommitPerRepos(url,null,repo.name);
-      });
-    },Promise.resolve());*/
+    //console.log('Repos Array-',data.getRepos());
+		return repos;
+    
+    
 	}).catch(err=>console.log(err));
 }
-
 
 
 getJSON('https://api.github.com/users/alamnr?client_id=4451d14d8fff3a16d020&client_secret=d317892c35d7a7f4e383b92052cda6e8b7a3b3ea')
@@ -106,15 +98,47 @@ getJSON('https://api.github.com/users/alamnr?client_id=4451d14d8fff3a16d020&clie
 	console.log('Email-',userData.email);
   let url ='https://api.github.com/users/' + userData.login + '/repos?per_page=100&client_id=4451d14d8fff3a16d020&client_secret=d317892c35d7a7f4e383b92052cda6e8b7a3b3ea';
  
-      getUserRepos(url);
+    return  getUserRepos(url);
  
 	 //console.log('Repo Array - ',repoArray);
+}).then((repos)=>{
+ console.log('All fetched repos-', repos);
+  
+  /* 
+   var sequence = Promise.resolve();
+
+   data.getRepos().forEach(repo=>{
+      let url = repo.commits_url.replace('{/sha}', '')+'?per_page=100&client_id=4451d14d8fff3a16d020&client_secret=d317892c35d7a7f4e383b92052cda6e8b7a3b3ea';
+       
+       sequence = sequence.then(()=>{
+        return getCommitPerRepos(url,null,repo.name);
+       }).then(commits=>{
+          console.log('commits count - ',commits);
+       });
+      
+    }) */
+  
+  data.getRepos().reduce((sequence,repo)=>{
+    let url = repo.commits_url.replace('{/sha}', '')+'?per_page=100&client_id=4451d14d8fff3a16d020&client_secret=d317892c35d7a7f4e383b92052cda6e8b7a3b3ea';
+    return sequence.then(()=>{
+      return getCommitPerRepos(url,null,repo.name);
+    }).then(commits=>{
+      console.log(repo.name,' - commits count - ',commits);
+    });
+  },Promise.resolve());
+  
+  
+ 
 }).catch(err=>console.log(err))
 
+/*
+Exception: ReferenceError: getJSON is not defined
+@Scratchpad/1:2:1
+*/
 
  function getCommitPerRepos(url, commits, repoName){
 	//console.log('commit url-',url);
-   getJSON(url).then(response=>{
+  return  getJSON(url).then(response=>{
 		//console.log(response);
 		if(!commits){
 			commits = [];
@@ -133,10 +157,11 @@ getJSON('https://api.github.com/users/alamnr?client_id=4451d14d8fff3a16d020&clie
       }
 		}
 		 
-		console.log('repoName - ',repoName,' commit - ',commits);
+		//console.log('repoName - ',repoName,' commit - ',commits);
     data.getCommitMap().set(repoName,commits);
     //console.log('Commit Map-',data.getCommitMap());
-		//return commits;
+		return commits;
+     
 	}).catch(err=>console.log(err));
 }
 
@@ -250,7 +275,8 @@ function createDataObject(){
 
 
 
+
 /*
-Exception: SyntaxError: missing ) after argument list
-@Scratchpad/1:33
+Exception: SyntaxError: unexpected token: ')'
+@Scratchpad/1:128
 */
