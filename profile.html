@@ -1,29 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 
 <head>
-    <meta charset="utf-8" />
+
+  <!-- For getting website splash image while sharing on  other site using Open Graph Protocol (OGP)  -->
+
+    <meta property="og:type" content="Website" />
+    <meta property="og:title" content="Github Profile Summary"/>
+    <meta property="og:image" content="https://alamnr.github.io/images/og-image.png"/>
+    <meta property="og:description" content="Take a step back and get a bird's eye view of your GitHub Account."/>
+    <!--<meta property="og:url" content="https://alamnr.github.io/" />
+    <meta property="og:site_name" content="Github Profile Summary" />-->
+
+
+  <!-- Set the viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="Description" content="github profile summary pwa service worker manifest promise API">
+
+
+  <!-- Set character encoding -->
+  <meta charset="utf-8">
+
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title id="title">Github Profile Summary</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Web Application Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Chrome for Android theme color -->
+    <meta name="theme-color" content="#2E3AA1">
+
+    <!-- Add to homescreen for Chrome on Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="PSK">
+    <link rel="icon" sizes="192x192" href="images/touch/icon-192x192.png">
+
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+
+    <!-- Add to homescreen for Safari on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Polymer Starter Kit">
+    <link rel="apple-touch-icon" href="images/touch/icon-192x192.png">
+
+    <!-- Tile for Win8 -->
+    <meta name="msapplication-TileColor" content="#3372DF">
+    <!--<meta name="msapplication-TileImage" content="images/touch/icon-192x192.png">-->
+
+
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
         crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Barlow+Semi+Condensed">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/load-awesome@1.1.0/css/square-jelly-box.min.css">
-    
+
     <link rel="stylesheet" href="css/social-boot.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/modal.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/chart.js"></script>
-   
+
+    <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+    <!--<script src="js/app.js"></script>-->
+    <script src="js/new_git_promise.js"></script>
+    <script src="js/chart-1.js"></script>
+    <!--<script src="js/chart.js"></script>-->
+
 </head>
 
 <body>
 
-   
+
     <section>
         <div class="container">
             <div class="row">
@@ -32,11 +80,11 @@
                                 <a class="breadcrumb-item" href="index.html">Home</a>
                                 <span class="breadcrumb-item active">Profile Summary</span>
                               </nav>
-                </div>    
+                </div>
                 <div class="col-xs-12 col-sm-3 col-md-6 col-lg-7">
-                    
+
                     <div class="progress">
-                        <div id="indicator" class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width:0%">
+                        <div id="indicator" class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width:0%">
                             0%
                         </div>
 
@@ -46,18 +94,18 @@
                 </div>
                 <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
                         <div class="text-center">
-                                <a class="btn btn-social-icon btn-twitter" title="Share On Twiiter" id="twitter" target="_blank">
-                                        <span class="fa fa-twitter"></span> 
+                                <a class="btn btn-social-icon btn-twitter" title="Share On Twiiter" id="twitter" target="_blank"  rel="noopener">
+                                        <span class="fa fa-twitter"></span>
                                 </a>
-                                <a class="btn btn-social-icon btn-facebook" title="Share On Facebook" id="facebook" target="_blank">
-                                        <span class="fa fa-facebook"></span> 
+                                <a class="btn btn-social-icon btn-facebook" title="Share On Facebook" id="facebook" target="_blank"  rel="noopener">
+                                        <span class="fa fa-facebook"></span>
                                 </a>
                         </div>
                 </div>
 
             </div>
             </div>
-            
+
     </section>
 
     <hr>
@@ -87,7 +135,7 @@
                     <h4 class="text-center">Repos per Language</h4>
                     <canvas id="langRepoCount"></canvas>
                 </div>
-                
+
                 <div id="langCommitCountDiv" class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
                     <h4 class="text-center">Commits per Language</h4>
                     <canvas id="langCommitCount"></canvas>
@@ -106,23 +154,69 @@
                     <h4 class="text-center">Commits per Repo (top 10)</h4>
                     <canvas id="repoCommitCount"></canvas>
                 </div>
-                
+
             </div>
         </div>
 
 
     </section>
-    
     <br><hr>
-    <footer><div class="fixed-bottom-custom"><div>GitHub profile summary is built with <span class="highlight">Vanilla Jvascript </span>  and <a href="http://www.chartjs.org/docs/latest/" target="_blank">chart.js</a> (visualization). Sources on <a target="_blank" href="https://github.com/alamnr/alamnr.github.io"> GitHub.</a></div><div> Inspired by <a href="https://profile-summary-for-github.com" target="_blank">profile-summary-for-github</a></div></div></footer>
+    <section id="following">
+        <div class="container">
+            <div class="row">
+                <div id="followingDiv" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <h4 class="text-center">Following:</h4>
+                    <!-- <div  class="grid" data-masonry='{ "itemSelector": ".grid-item", "columnWidth": 20 }'> -->
+                    <div  class="gridFollowing">
+                    </div>
+                </div>
+
+            </div>
+        </div>
 
 
+    </section>
+
+    <br><hr>
+
+    <section id="followers">
+        <div class="container">
+            <div class="row">
+                <div id="followersDiv" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <h4 class="text-center">Followers:</h4>
+                    <!-- <div  class="grid" data-masonry='{ "itemSelector": ".grid-item", "columnWidth": 20 }'> -->
+                    <div  class="gridFollowers">
+                    </div>
+                </div>
+
+            </div>
+        </div>
 
 
+    </section>
+
+    <br><hr>
+    <footer><div class="fixed-bottom-custom"><div>GitHub profile summary is built with <span class="highlight">Vanilla Javascript </span>,<a href="https://masonry.desandro.com" target="_blank"  rel="noopener">masonry.js</a>  and <a href="http://www.chartjs.org/docs/latest/" target="_blank"  rel="noopener">chart.js</a> (visualization). Sources on <a target="_blank"  rel="noopener" href="https://github.com/alamnr/alamnr.github.io"> GitHub.</a></div><div> Inspired by <a href="https://profile-summary-for-github.com" target="_blank"  rel="noopener">profile-summary-for-github</a></div></div></footer>
+
+    <span class="rate-limit">
+        <span class="msg">The app is currently rate-limited<br>Please check back later</span>
+        <span class="count"><span id="rate-limit-count"></span> requests left <br> before rate-limit</span>
+    </span>
+
+    <!-- Loading Modal -->
+
+      <div class="container" id="modal">
+      	<div class="row">
+      	      <div class="animationload">
+                  <div class="osahanloading"></div>
+              </div>
+      	</div>
+    </div>
     <script>
         var urlParams;
-        
+
         (window.onpopstate = function () {
+            checkRateLimit();
             var match,
                 pl = /\+/g,  // Regex for replacing addition symbol with a space
                 search = /([^&=]+)=?([^&]*)/g,
@@ -133,26 +227,28 @@
             while (match = search.exec(query)){
                 urlParams[decode(match[1])] = decode(match[2]);
             }
-                
+
             document.getElementById('title').innerText = urlParams['user'] + '\'s Github Profile Summary';
-            
+
             // Don't pollute the global scope, create data Object in function Scope
             if(urlParams['user']){
-                
+                document.body.setAttribute('data-user-id',urlParams['user']);
+                var data = createDataObject();
                 getUserInfo(urlParams['user'], data);
+                document.querySelector('#modal .animationload').style.display = 'block';
             }
             else{
 				window.location.replace(window.location.href.substring(0,window.location.href.lastIndexOf('/')+1)+'index.html');
             }
-            
+
+
         })();
 
-        
-        
-        
-       
-    </script>
 
+
+
+
+    </script>
 
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
@@ -162,7 +258,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
 
-   
+
 
 </body>
 

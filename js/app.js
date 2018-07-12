@@ -15,20 +15,80 @@ function createCORSRequest(method, url) {
   return xhr;
 }
 
-/* Global  Scope */
-var quarterCommitCount = new Map();
-var langRepoCount = new Map();
-var langStarCount = new Map();
-var langCommitCount = new Map();
-var repoCommitCount = new Map();
-var repoStarCount = new Map();
-var repoCommitCountDescriptions = new Map();
-var repoStarCountDescriptions = new Map();
-var user;
+/* Don't Pollute the Global  Scope */
+
+function createDataObject(){
+  var quarterCommitCount = new Map();
+  var langRepoCount = new Map();
+  var langStarCount = new Map();
+  var langCommitCount = new Map();
+  var repoCommitCount = new Map();
+  var repoStarCount = new Map();
+  var repoCommitCountDescriptions = new Map();
+  var repoStarCountDescriptions = new Map();
+  var user;
+  var dataObject ={
+    getQuarterCommitCount:function(){
+      return quarterCommitCount;
+    },
+    setQuarterCommitCount:function(quarterCommitCountMap){
+      quarterCommitCount = quarterCommitCountMap;
+    },
+    getLangRepoCount:function(){
+      return langRepoCount;
+    },
+    setLangRepoCount:function(langRepoCountMap){
+      langRepoCount = langRepoCountMap;
+    },
+    getLangStarCount:function(){
+      return langStarCount;
+    },
+    setLangStarCount: function(langStarCountMap){
+      langStarCount = langStarCountMap;
+    },
+    getLangCommitCount:function(){
+      return langCommitCount;
+    },
+    setLangCommitCount:function(langCommitCountMap){
+       langCommitCount = langCommitCountMap;
+    },
+    getRepoCommitCount:function(){
+      return repoCommitCount;
+    },
+    setRepoCommitCount:function(repoCommitCountMap){
+      repoCommitCount = repoCommitCountMap;
+    },
+    getRepoStarCount:function(){
+      return repoStarCount;
+    },
+    setRepoStarCount: function(repoStarCountMap){
+      repoStarCount = repoStarCountMap;
+    },
+    getRepoCommitCountDescriptions:function(){
+      return repoCommitCountDescriptions;
+    },
+    setRepoCommitCountDescriptions: function(repoCommitCountDescriptionsMap){
+      repoCommitCountDescriptions = repoCommitCountDescriptionsMap;
+    },
+    getRepoStarCountDescriptions:function(){
+      return repoStarCountDescriptions;
+    },
+    setRepoStarCountDescriptions:function(repoStarCountDescriptionsMap){
+      repoStarCountDescriptions = repoStarCountDescriptionsMap
+    },
+    getUser:function(){
+      return user;
+    },
+    setUser:function(userObj){
+      user = userObj;
+    }
+
+  };
+  return dataObject;
+}
 
 
-
-function getUserInfo(userName) {
+function getUserInfo(userName, data) {
 
   var progressDiv = document.querySelector('.progress');
   var indicatorDiv = document.querySelector('#indicator');
@@ -61,7 +121,7 @@ function getUserInfo(userName) {
     }
     if (this.readyState == 4 && this.status == 403) {
       var obj = JSON.parse(this.responseText);
-      console.log(obj);
+      //console.log(obj);
 
       indicatorDiv.className = 'progress-bar progress-bar-striped bg-danger';
       setTimeout(() => progressDiv.style.visibility = 'hidden', 1000);
@@ -70,20 +130,20 @@ function getUserInfo(userName) {
     }
     if (this.readyState == 4 && this.status == 404) {
       var response = JSON.parse(this.responseText);
-      console.log(response.message);
+      //console.log(response.message);
       indicatorDiv.className = 'progress-bar progress-bar-striped bg-danger';
       setTimeout(() => progressDiv.style.visibility = 'hidden', 1000);
       document.getElementById('errMsg').innerHTML = response.message;
       document.getElementById('errMsg').style.color = 'red';
     }
     if (this.readyState == 4 && this.status == 200) {
-       user = JSON.parse(this.responseText);
-
-      document.getElementById('profileImage').src = user.avatar_url;
-      document.getElementById('profileImage').alt = user.name;
-      document.getElementById('bio').innerHTML = user.bio;
+       data.setUser(JSON.parse(this.responseText));
+       //console.log(data.getUser());
+      document.getElementById('profileImage').src = data.getUser().avatar_url;
+      document.getElementById('profileImage').alt = data.getUser().name;
+      document.getElementById('bio').innerHTML = data.getUser().bio;
      
-      var then = new Date(user.created_at);
+      var then = new Date(data.getUser().created_at);
 
       var today = new Date();
       var lastQuarter = today.getFullYear() + '-Q' + (Math.ceil((today.getMonth() + 1) / 3));
@@ -92,18 +152,27 @@ function getUserInfo(userName) {
       for (var i = then.getFullYear(); i <= today.getFullYear(); i++) {
         for (var j = 1; j <= 4; j++) {
           var quarter = i + '-Q' + j;
-          quarterCommitCount.set(quarter, 0);
+          data.getQuarterCommitCount().set(quarter, 0);
           if (quarter == lastQuarter) break;
         }
 
       }
-      
-      calculateQuarterCommitCount(user.login);
+      //console.log(data.getQuarterCommitCount());
+      calculateQuarterCommitCount(data);
       //console.log(quarterCommitCount);
      
     }
 
   }
+
+  // Handle network errors
+  req.onerror = function() {
+      indicatorDiv.className = 'progress-bar progress-bar-striped bg-danger';
+      setTimeout(() => progressDiv.style.visibility = 'hidden', 1000);
+      document.getElementById('errMsg').innerHTML = 'Network Error';
+      document.getElementById('errMsg').style.color = 'red';
+  };
+
 
   xhr.send();
 }
@@ -114,7 +183,7 @@ function buildUserDetails(user) {
   var today = new Date();
   var year = Math.floor((today - then) / 31536000000);
   var output = `<ul class="list-group list-group-flush">
-                    <li class="list-group-item"><i class="fa fa-fw fa-user"></i> ${user.login} <p><small>( ${user.name} )</small></p>  </li>
+                    <li class="list-group-item"><i class="fa fa-fw fa-user"></i> ${user.login} <p><small>( ${user.name ? user.name : ''} )</small></p>  </li>
                     <li class="list-group-item"><i class="fa fa-fw fa-database"></i> ${user.public_repos} public repos <p><small>(Own Repos- ${user.ownRepos?user.ownRepos:'0'}, Forked- ${user.forkedRepos})</small></p> </li>
                     <li class="list-group-item"><i class="fa fa-fw fa-clock-o"></i>Joined GitHub ${year} Year Ago  </li>
                     <li class="list-group-item"><i class="fa fa-fw fa-envelope"></i> ${user.email ? user.email : ''}  </li>
@@ -126,8 +195,8 @@ function buildUserDetails(user) {
 
 
 
-function calculateQuarterCommitCount(userName) {
-  var url = 'https://api.github.com/users/' + userName + '/repos?per_page=1000';
+function calculateQuarterCommitCount(data) {
+  var url = 'https://api.github.com/users/' + data.getUser().login + '/repos?per_page=1000';
   var xhr = createCORSRequest('GET', url);
 
   if (!xhr) {
@@ -143,29 +212,43 @@ function calculateQuarterCommitCount(userName) {
       const unforkRepo = repos.filter(repo => {
         return repo.fork === false && repo.size !== 0
       })
-     // console.log('Own Repos -' + unforkRepo.length);
-      user.ownRepos= unforkRepo.length;
-      user.forkedRepos= repos.length - unforkRepo.length;
+      //console.log('Own Repos -' + unforkRepo.length);
+      data.getUser().ownRepos= unforkRepo.length;
+      data.getUser().forkedRepos= repos.length - unforkRepo.length;
       unforkRepo.forEach((myRepo,index, repoArray) => {
         
-        langRepoCount.set(myRepo.language,(langRepoCount.get(myRepo.language) ?  langRepoCount.get(myRepo.language) :0) +1);
-        langStarCount.set(myRepo.language,(langStarCount.get(myRepo.language) ?  langStarCount.get(myRepo.language) :0) +myRepo.watchers_count);
+        data.getLangRepoCount().set(myRepo.language,(data.getLangRepoCount().get(myRepo.language) ?  data.getLangRepoCount().get(myRepo.language) :0) +1);
+        data.getLangStarCount().set(myRepo.language,(data.getLangStarCount().get(myRepo.language) ?  data.getLangStarCount().get(myRepo.language) :0) +myRepo.watchers_count);
 
-        repoStarCount.set(myRepo.name,(repoStarCount.get(myRepo.name) ?  repoStarCount.get(myRepo.name) :0) +myRepo.watchers_count);
-        repoStarCountDescriptions.set(myRepo.name,myRepo.description ? myRepo.description:'Description Not Found' );
+        data.getRepoStarCount().set(myRepo.name,(data.getRepoStarCount().get(myRepo.name) ?  data.getRepoStarCount().get(myRepo.name) :0) +myRepo.watchers_count);
+        data.getRepoStarCountDescriptions().set(myRepo.name,myRepo.description ? myRepo.description:'Description Not Found' );
         //console.log(myRepo.commits_url.replace('{/sha}',''))
-        makeAjaxCORSRequestForQuarterCommitLineChart(myRepo.commits_url.replace('{/sha}', ''),index, repoArray);
-
+        makeCORSRequestForCommitCount(myRepo.commits_url.replace('{/sha}', ''),index, repoArray,data);
+        
       })
+      if(unforkRepo.length===0){
+        buildUserDetails(data.getUser());
+        createLineChart('quarterCommitCount',data);
+
+        document.querySelector('#indicator').style.width = '100%';
+        document.querySelector('#indicator').innerHTML = '100%';
+        setTimeout(() => document.querySelector('.progress').style.visibility = 'hidden', 1000);
+      }
       
     }
   }
-
+  // Handle network errors
+  req.onerror = function() {
+    indicatorDiv.className = 'progress-bar progress-bar-striped bg-danger';
+    setTimeout(() => progressDiv.style.visibility = 'hidden', 1000);
+    document.getElementById('errMsg').innerHTML = 'Network Error';
+    document.getElementById('errMsg').style.color = 'red';
+  };
   xhr.send();
 }
 
 var i=0;
-function makeAjaxCORSRequestForQuarterCommitLineChart(url,index, repoArray) {
+function makeCORSRequestForCommitCount(url,index, repoArray,data) {
   var xhr = createCORSRequest('GET', url);
   
   if (!xhr) {
@@ -184,21 +267,21 @@ function makeAjaxCORSRequestForQuarterCommitLineChart(url,index, repoArray) {
 
         var commitDate = new Date(commit.commit.committer.date);
         var commitQuarter = commitDate.getFullYear() + '-Q' + (Math.ceil((commitDate.getMonth() + 1) / 3));
-        quarterCommitCount.set(commitQuarter, quarterCommitCount.get(commitQuarter) + 1);
+        data.getQuarterCommitCount().set(commitQuarter, data.getQuarterCommitCount().get(commitQuarter) + 1);
 
-        langCommitCount.set(repoArray[index].language,(langCommitCount.get(repoArray[index].language) ?  langCommitCount.get(repoArray[index].language) :0) +1);
+        data.getLangCommitCount().set(repoArray[index].language,(data.getLangCommitCount().get(repoArray[index].language) ?  data.getLangCommitCount().get(repoArray[index].language) :0) +1);
 
-        repoCommitCount.set(repoArray[index].name,(repoCommitCount.get(repoArray[index].name) ?  repoCommitCount.get(repoArray[index].name) :0) +1);
-        repoCommitCountDescriptions.set(repoArray[index].name,repoArray[index].description? repoArray[index].description:'Description Not Found' );
+        data.getRepoCommitCount().set(repoArray[index].name,(data.getRepoCommitCount().get(repoArray[index].name) ?  data.getRepoCommitCount().get(repoArray[index].name) :0) +1);
+        data.getRepoCommitCountDescriptions().set(repoArray[index].name,repoArray[index].description? repoArray[index].description:'Description Not Found' );
       
       })
      // console.log('i-'+i+' length-'+repoArray.length);
       if(i===repoArray.length){
-        buildUserDetails(user);
-        createLineChart();
-        createDoughnutChart('langRepoCount',langRepoCount);
+        buildUserDetails(data.getUser());
+        createLineChart('quarterCommitCount',data);
+        createDoughnutChart('langRepoCount',data);
        
-        for (let value of langStarCount.values()) {
+        for (let value of data.getLangStarCount().values()) {
           if(value){
             let output = `<div id="langStarCountDiv" class="col-xs-12 col-sm-12 col-md-12 col-lg-4">
             <h4 class="text-center">Star per Language </h4>
@@ -210,21 +293,21 @@ function makeAjaxCORSRequestForQuarterCommitLineChart(url,index, repoArray) {
             let targetDiv=document.getElementById('langRepoCountDiv')
             var divToAppend = document.createRange().createContextualFragment(output);
             targetDiv.parentNode.insertBefore(divToAppend, targetDiv.nextSibling)
-            createDoughnutChart('langStarCount',langStarCount);
+            createDoughnutChart('langStarCount',data);
             
             break;
           }
         }
-        for (let value of langCommitCount.values()) {
+        for (let value of data.getLangCommitCount().values()) {
           if(value){
-            createDoughnutChart('langCommitCount',langCommitCount);
+            createDoughnutChart('langCommitCount',data);
             break;
           }
         }
 
-        for (let value of repoCommitCount.values()) {
+        for (let value of data.getRepoCommitCount().values()) {
           if(value){
-            var top10SortedRepoCommitCount = new Map([...repoCommitCount.entries()].sort((a, b) => b[1] - a[1]));
+            var top10SortedRepoCommitCount = new Map([...data.getRepoCommitCount().entries()].sort((a, b) => b[1] - a[1]));
             var top10SortedRepoCommitCountDescription = new Map();
             var j= 0;
             top10SortedRepoCommitCount.forEach(function(value,key,map){
@@ -238,17 +321,18 @@ function makeAjaxCORSRequestForQuarterCommitLineChart(url,index, repoArray) {
             })
            // console.log(top10SortedRepoCommitCount);
             top10SortedRepoCommitCount.forEach(function(value,key,map){
-              top10SortedRepoCommitCountDescription.set(key,repoCommitCountDescriptions.get(key));
+              top10SortedRepoCommitCountDescription.set(key,data.getRepoCommitCountDescriptions().get(key));
            })
-           repoCommitCountDescriptions = top10SortedRepoCommitCountDescription;
+           data.setRepoCommitCountDescriptions(top10SortedRepoCommitCountDescription);
+           data.setRepoCommitCount(top10SortedRepoCommitCount);
            //console.log(repoCommitCountDescriptions);
-            createDoughnutChart('repoCommitCount',top10SortedRepoCommitCount);
+            createDoughnutChart('repoCommitCount',data);
             break;
           }
         }
 
         
-        for (let value of repoStarCount.values()) {
+        for (let value of data.getRepoStarCount().values()) {
           if(value){
             let output =`<div id="repoStarCountDiv"  class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
             <h4 class="text-center">Stars per Repo (top 10)</h4>
@@ -262,7 +346,7 @@ function makeAjaxCORSRequestForQuarterCommitLineChart(url,index, repoArray) {
         var divToAppend = document.createRange().createContextualFragment(output);
         targetDiv.parentNode.insertBefore(divToAppend, targetDiv.nextSibling)
 
-             var top10SortedRepoStarCount = new Map([...repoStarCount.entries()].sort((a, b) => b[1] - a[1]));
+             var top10SortedRepoStarCount = new Map([...data.getRepoStarCount().entries()].sort((a, b) => b[1] - a[1]));
               var top10SortedRepoStarCountDescription = new Map();
             var j= 0;
             top10SortedRepoStarCount.forEach(function(value,key,map){
@@ -276,16 +360,17 @@ function makeAjaxCORSRequestForQuarterCommitLineChart(url,index, repoArray) {
             })
            // console.log(top10SortedRepoStarCount);
              top10SortedRepoStarCount.forEach(function(value,key,map){
-                top10SortedRepoStarCountDescription.set(key,repoStarCountDescriptions.get(key));
+                top10SortedRepoStarCountDescription.set(key,data.getRepoStarCountDescriptions().get(key));
              })
-             repoStarCountDescriptions = top10SortedRepoStarCountDescription;
+             data.setRepoStarCountDescriptions(top10SortedRepoStarCountDescription);
+             data.setRepoStarCount(top10SortedRepoStarCount);
             // console.log(repoStarCountDescriptions);
-            createDoughnutChart('repoStarCount',top10SortedRepoStarCount);
+            createDoughnutChart('repoStarCount',data);
             break;
           }
         } 
 
-        setShareButtonHref();
+        setShareButtonHref(data.getUser());
          
         document.querySelector('#indicator').style.width = '100%';
         document.querySelector('#indicator').innerHTML = '100%';
@@ -295,13 +380,19 @@ function makeAjaxCORSRequestForQuarterCommitLineChart(url,index, repoArray) {
       
     }
   }
-
+  // Handle network errors
+  req.onerror = function() {
+    indicatorDiv.className = 'progress-bar progress-bar-striped bg-danger';
+    setTimeout(() => progressDiv.style.visibility = 'hidden', 1000);
+    document.getElementById('errMsg').innerHTML = 'Network Error';
+    document.getElementById('errMsg').style.color = 'red';
+  };
   xhr.send();
 
 }
 
 
-function setShareButtonHref(){
+function setShareButtonHref(user){
   let profileUrl  = "https://alamnr.github.io/profile.html?user=" + user.login;
   let shareText = user.login + "'s GitHub profile - Visualized:";
   let twitterUrl = "https://twitter.com/intent/tweet?url=" + profileUrl + "&text=" + shareText + "&via=javascript&related=scope_closer";
